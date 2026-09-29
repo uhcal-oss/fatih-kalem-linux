@@ -1,0 +1,12 @@
+# Installers
+*.exe
+fatihkalem_setup.exe
+
+# Temporary files
+*.tmp
+*.log
+*~
+.DS_Store
+
+# Wine prefix backups
+.wine*

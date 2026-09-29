@@ -1,0 +1,24 @@
+#!/bin/bash
+# Fatih Kalem Linux Launcher
+# Handles Wine environment, Sandy Bridge/Intel HD GPU overrides and launches Fatih Kalem.
+
+export WINEPREFIX="${WINEPREFIX:-$HOME/.wine}"
+
+# Intel Sandy Bridge / Intel HD Graphics 3000 compatibility:
+# Force Wine's native OpenGL translation instead of DXVK (Vulkan is not supported on Sandy Bridge)
+export WINEDLLOVERRIDES="${WINEDLLOVERRIDES:+${WINEDLLOVERRIDES};}d3d9=b;d3d11=b;dxgi=b"
+
+EXE_PATH="$WINEPREFIX/drive_c/Program Files (x86)/Fatih Kalem/Fatih Kalem.exe"
+
+if [ ! -f "$EXE_PATH" ]; then
+    # Check alternate prefix or 64-bit location if any
+    if [ -f "$WINEPREFIX/drive_c/Program Files/Fatih Kalem/Fatih Kalem.exe" ]; then
+        EXE_PATH="$WINEPREFIX/drive_c/Program Files/Fatih Kalem/Fatih Kalem.exe"
+    else
+        echo "Error: Fatih Kalem is not installed in $WINEPREFIX" >&2
+        echo "Please run install.sh first." >&2
+        exit 1
+    fi
+fi
+
+exec wine "$EXE_PATH" "$@"

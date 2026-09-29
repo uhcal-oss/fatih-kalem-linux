@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Fatih Kalem
+GenericName=Akıllı Tahta Kalem Uygulaması
+Comment=Fatih Projesi Akıllı Tahta Kalem Uygulaması
+Exec=fatih-kalem
+Icon=fatih-kalem
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Education;Utility;Graphics;
+Keywords=fatih;kalem;tahta;yazı;çizim;whiteboard;
+StartupWMClass=fatih kalem.exe
