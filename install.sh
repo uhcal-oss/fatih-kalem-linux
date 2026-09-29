@@ -2,24 +2,21 @@
 # ==============================================================================
 # Fatih Kalem Linux Automated Installer
 # Works on Fedora, Debian, Ubuntu, Arch Linux and derived distributions.
-# Compatible with Faz 1 / Faz 2 smart boards and desktop PCs with Intel/AMD/Nvidia GPUs.
+# Compatible with Intel/AMD/Nvidia GPUs and modern desktop environments.
 # ==============================================================================
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ASSUME_YES=false
-SKIP_TOUCH=false
 
 while [[ "$#" -gt 0 ]]; do
     case "$1" in
         -y|--yes) ASSUME_YES=true ;;
-        --no-touch) SKIP_TOUCH=true ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo "Options:"
             echo "  -y, --yes      Automatic mode (accept all defaults without prompting)"
-            echo "  --no-touch     Skip Faz 1 touchscreen driver setup"
             echo "  -h, --help     Show this help message"
             exit 0
             ;;
@@ -57,7 +54,7 @@ elif command -v pacman >/dev/null 2>&1; then
     PKG_MGR="pacman"
 fi
 
-echo "[1/7] Checking Wine prerequisites..."
+echo "[1/6] Checking Wine prerequisites..."
 if ! command -v wine >/dev/null 2>&1; then
     echo "Wine is not installed. Installing Wine..."
     case "$PKG_MGR" in
@@ -81,12 +78,12 @@ fi
 
 # Initialize Wine prefix if not already created
 export WINEPREFIX="${WINEPREFIX:-$HOME/.wine}"
-echo "[2/7] Initializing Wine prefix at $WINEPREFIX..."
+echo "[2/6] Initializing Wine prefix at $WINEPREFIX..."
 wineboot -u
 # Wait for wineserver to settle
 wineserver -w || true
 
-echo "[3/7] Patching Wine-Mono with Microsoft WPF Core Runtime..."
+echo "[3/6] Patching Wine-Mono with Microsoft WPF Core Runtime..."
 # Locate wine-mono directories
 MONO_DIRS=(/usr/share/wine/mono/wine-mono-*)
 if [ ${#MONO_DIRS[@]} -eq 0 ] || [ ! -d "${MONO_DIRS[0]}" ]; then
@@ -123,7 +120,7 @@ mkdir -p "$WINEPREFIX/drive_c/windows/system32" "$WINEPREFIX/drive_c/windows/sys
 cp -v "$SCRIPT_DIR/assets/wpf-native/x64/"* "$WINEPREFIX/drive_c/windows/system32/" 2>/dev/null || true
 cp -v "$SCRIPT_DIR/assets/wpf-native/x86/"* "$WINEPREFIX/drive_c/windows/syswow64/" 2>/dev/null || true
 
-echo "[4/7] Applying Direct3D / OpenGL graphics compatibility fixes..."
+echo "[4/6] Applying Direct3D / OpenGL graphics compatibility fixes..."
 # Intel HD Graphics 3000 (Sandy Bridge) does not support Vulkan in hardware.
 # On Fedora, switch update-alternatives to native WineD3D (OpenGL) instead of DXVK
 if command -v update-alternatives >/dev/null 2>&1; then
@@ -138,7 +135,7 @@ fi
 # Configure Avalon software rendering fallback in Wine registry
 wine reg add "HKEY_CURRENT_USER\\Software\\Microsoft\\Avalon.Graphics" /v "DisableHWAcceleration" /t REG_DWORD /d 1 /f >/dev/null 2>&1 || true
 
-echo "[5/7] Locating and installing Fatih Kalem..."
+echo "[5/6] Locating and installing Fatih Kalem..."
 INSTALLER=""
 CANDIDATES=(
     "$SCRIPT_DIR/fatihkalem_setup.exe"
@@ -177,7 +174,7 @@ if [ -d "$APP_DIR" ]; then
           "$APP_DIR/wpfgfx_cor3.dll" "$APP_DIR/wpfgfx_v0400.dll" "$APP_DIR/Fatih Kalem.exe.config"
 fi
 
-echo "[6/7] Installing desktop launcher, system CLI wrapper and icon..."
+echo "[6/6] Installing desktop launcher, system CLI wrapper and icon..."
 # Install CLI wrapper
 $SUDO cp -v "$SCRIPT_DIR/fatih-kalem" /usr/local/bin/fatih-kalem
 $SUDO chmod +x /usr/local/bin/fatih-kalem
@@ -201,21 +198,6 @@ $SUDO update-desktop-database /usr/share/applications/ 2>/dev/null || true
 update-desktop-database "$HOME/.local/share/applications/" 2>/dev/null || true
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
     $SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
-fi
-
-echo "[7/7] Checking for Faz 1 Smart Board Touchscreen Hardware..."
-if [ "$SKIP_TOUCH" = false ]; then
-    if lsusb 2>/dev/null | grep -q "6615:0c20"; then
-        echo "Found Faz 1 IRTouch touchscreen hardware (USB ID 6615:0c20)."
-        if [ "$ASSUME_YES" = true ]; then
-            $SUDO bash "$SCRIPT_DIR/touch-driver/install-touch.sh" || true
-        else
-            echo "Configuring touchscreen driver..."
-            $SUDO bash "$SCRIPT_DIR/touch-driver/install-touch.sh" || true
-        fi
-    else
-        echo "No Faz 1 IRTouch touchscreen detected. Skipping touch driver setup."
-    fi
 fi
 
 # Ensure clean wineserver shutdown
