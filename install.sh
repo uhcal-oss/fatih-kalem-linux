@@ -132,7 +132,10 @@ if command -v update-alternatives >/dev/null 2>&1; then
     done
 fi
 
-# Configure Avalon software rendering fallback in Wine registry
+# Configure Avalon software rendering fallback in Wine registry (both HKLM and HKCU)
+# wpfgfx explicitly queries HKEY_LOCAL_MACHINE to enforce software rasterization for layered transparent windows.
+wine reg add "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Avalon.Graphics" /v "DisableHWAcceleration" /t REG_DWORD /d 1 /f >/dev/null 2>&1 || true
+wine reg add "HKEY_LOCAL_MACHINE\\Software\\Wow6432Node\\Microsoft\\Avalon.Graphics" /v "DisableHWAcceleration" /t REG_DWORD /d 1 /f >/dev/null 2>&1 || true
 wine reg add "HKEY_CURRENT_USER\\Software\\Microsoft\\Avalon.Graphics" /v "DisableHWAcceleration" /t REG_DWORD /d 1 /f >/dev/null 2>&1 || true
 
 echo "[5/6] Locating and installing Fatih Kalem..."
@@ -176,8 +179,11 @@ fi
 
 echo "[6/6] Installing desktop launcher, system CLI wrapper and icon..."
 # Install CLI wrapper
-$SUDO cp -v "$SCRIPT_DIR/fatih-kalem" /usr/local/bin/fatih-kalem
-$SUDO chmod +x /usr/local/bin/fatih-kalem
+$SUDO cp -v "$SCRIPT_DIR/fatih-kalem" /usr/local/bin/fatih-kalem 2>/dev/null || true
+$SUDO chmod +x /usr/local/bin/fatih-kalem 2>/dev/null || true
+mkdir -p "$HOME/.local/bin"
+cp -v "$SCRIPT_DIR/fatih-kalem" "$HOME/.local/bin/fatih-kalem"
+chmod +x "$HOME/.local/bin/fatih-kalem"
 
 # Install icons
 $SUDO mkdir -p /usr/share/icons/hicolor/256x256/apps

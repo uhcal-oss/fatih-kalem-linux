@@ -26,6 +26,10 @@ Fatih Kalem, Windows Presentation Foundation (.NET 4.5 WPF) tabanlı bir 32-bit 
    2. Nesil Intel Core i3/i5 (Sandy Bridge) GPU'larının donanımsal Vulkan desteği yoktur. Fedora gibi güncel dağıtımlar Direct3D için DXVK'yı varsayılan yaptığı için GPU `llvmpipe` (CPU simülasyonu) üzerinden çalışmaya zorlanır ve çöker.
    - **Çözüm**: Kurulum betiği Direct3D alternatiflerini Intel HD 3000'in tam donanım hızlandırma sağladığı yerel Mesa OpenGL (WineD3D) motoruna yönlendirir.
 
+3. **Kalem Modunda Siyah Ekran ve Şeffaf Çizim Katmanı**:
+   Fatih Kalem tam ekran kalem moduna (`AllowsTransparency=True`) geçtiğinde WPF Direct3D 9 üzerinden 24-bit visual'a çizim yaparak tüm ekranı siyaha bürür.
+   - **Çözüm**: `HKLM\Software\Microsoft\Avalon.Graphics\DisableHWAcceleration` makine genelinde aktif edilerek WPF'in şeffaf katmanı doğrudan 32-bit ARGB `UpdateLayeredWindow` üzerinden çizmesi sağlanmıştır. Böylece masaüstü görünür kalır ve dokunmatik tahtada akıcı çizim yapılır.
+
 ---
 
 ### 🚀 Hızlı Kurulum
@@ -79,6 +83,7 @@ Automated installer and compatibility layer to run **Fatih Kalem** (MEB / EBA in
 ### 🎯 Key Fixes
 - **WPF Native MilCore Integration**: Patches Wine-Mono with genuine Microsoft WPF Core runtime DLLs (`wpfgfx_cor3.dll`, `PenImc_cor3.dll`, `D3DCompiler_47_cor3.dll`) to eliminate `EntryPointNotFoundException` and render thread failures.
 - **Intel HD 3000 Compatibility**: Bypasses DXVK / Vulkan on Sandy Bridge hardware and routes rendering through native hardware-accelerated OpenGL (WineD3D).
+- **Transparent Drawing Overlay & Black Screen Fix**: Resolves the black screen bug when entering pen drawing mode by enforcing machine-level software rasterization (`DisableHWAcceleration=1` under `HKLM\Software\Microsoft\Avalon.Graphics`). This allows WPF to composite the layered transparent drawing canvas via 32-bit ARGB `UpdateLayeredWindow` without blanking the desktop or breaking touch capture.
 
 ### 🚀 Installation
 ```bash

@@ -7,6 +7,9 @@ export WINEPREFIX="${WINEPREFIX:-$HOME/.wine}"
 # Intel Sandy Bridge / Intel HD Graphics 3000 compatibility:
 # Force Wine's native OpenGL translation instead of DXVK (Vulkan is not supported on Sandy Bridge)
 export WINEDLLOVERRIDES="${WINEDLLOVERRIDES:+${WINEDLLOVERRIDES};}d3d9=b;d3d11=b;dxgi=b"
+# Force WPF software rendering for layered window transparency compatibility
+export WPF_FORCE_SOFTWARE_RENDERING=1
+export DOTNET_EnableWpfSoftwareRendering=1
 
 EXE_PATH="$WINEPREFIX/drive_c/Program Files (x86)/Fatih Kalem/Fatih Kalem.exe"
 
