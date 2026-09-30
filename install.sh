@@ -196,6 +196,10 @@ $SUDO mkdir -p /usr/share/applications
 $SUDO cp -v "$SCRIPT_DIR/assets/fatih-kalem.desktop" /usr/share/applications/fatih-kalem.desktop
 mkdir -p "$HOME/.local/share/applications" "$HOME/Desktop"
 cp -v "$SCRIPT_DIR/assets/fatih-kalem.desktop" "$HOME/.local/share/applications/fatih-kalem.desktop"
+cp -v "$SCRIPT_DIR/assets/fatih-kalem.desktop" "$HOME/.local/share/applications/Fatih Kalem.desktop"
+if [ -d "$HOME/.local/share/applications/wine/Programs" ]; then
+    cp -v "$SCRIPT_DIR/assets/fatih-kalem.desktop" "$HOME/.local/share/applications/wine/Programs/Fatih Kalem.desktop"
+fi
 cp -v "$SCRIPT_DIR/assets/fatih-kalem.desktop" "$HOME/Desktop/Fatih Kalem.desktop"
 chmod +x "$HOME/Desktop/Fatih Kalem.desktop"
 
